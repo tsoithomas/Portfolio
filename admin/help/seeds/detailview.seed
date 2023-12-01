@@ -1,0 +1,44 @@
+<?php
+
+function show#record#($#primarykey#=null){
+	if (!isset($#primarykey#)) $#primarykey#=SGET('#primarykey#');
+	
+	global $db;
+	
+	$user=userinfo();
+#include-detailview_nogs-when-gslock-is-0##include-detailview_gs-when-gslock-is-1#
+	
+	if (!$myrow=sql_fetch_assoc($rs)) die(_tr('record_removed'));
+	
+#iterator-fieldlist-myrowlist#	
+
+	header('newtitle:'.tabtitle(htmlspecialchars($#dispfield#)));
+	makechangebar('#record#_'.$#primarykey#,"update#record#('$#primarykey#','".makegskey('update#record#_'.$#primarykey#)."');");
+	makesavebar('#record#_'.$#primarykey#);
+?>
+<div class="section">
+#include-rectitle_basic-when-splitdispfield-is-0##include-rectitle_editable-when-splitdispfield-is-1#
+
+	<div class="col">
+
+
+#iterator-fieldlist-detailview#
+	
+	<div class="inputrow buttonbelt">
+		<button onclick="update#record#('<?php echo $#primarykey#;?>','<?php emitgskey('update#record#_'.$#primarykey#);?>');"><?php tr('button_update');?></button>
+
+		&nbsp; &nbsp;
+		<button class="warn" onclick="del#record#('<?php echo $#primarykey#;?>','<?php emitgskey('del#record#_'.$#primarykey#);?>');"><?php tr('button_delete');?></button>
+
+
+	</div>
+
+
+	</div>
+	<div class="col">
+
+	</div>
+	<div class="clear"></div>
+</div>
+<?php
+}

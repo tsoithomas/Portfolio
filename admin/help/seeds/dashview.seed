@@ -1,0 +1,18 @@
+<?php
+include 'icl/list#records#.inc.php';
+
+function dash#records#(){
+#include-dashheader_root-when-dashmode-is-root##include-dashheader_sub-when-dashmode-is-sub#	
+
+?>
+<div class="section">
+	<div class="sectiontitle"><?php tr('icon_#records#');?></div>
+	
+	
+		<?php list#records#(); ?>
+	
+		<div class="clear"></div>
+</div>
+
+<?php		
+}

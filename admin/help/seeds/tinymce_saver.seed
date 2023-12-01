@@ -1,0 +1,24 @@
+	global $soidxes; //smart object indexes
+
+	$#editfield#=SQET('#editfield#');
+	$#editfield#=str_replace('<p>&nbsp;</p>','',$#editfield#); // '>&nbsp;</' -> '></'
+	
+	//Image localizer stores images locally and allows direct pasting in Firefox
+	//It is included in the commercial version of Gyroscope
+	
+	//$#editfield#=localizeimages($#editfield#);
+
+	//preg_replace_callback('/<p>\{\{(\S+)\s*([\S\s]*?)\}\}<\/p>/','auto#editfield#index',$blogtext);
+
+
+
+	...
+
+function auto#editfield#index($matches){
+	global $soidxes;
+
+	$func=$matches[1];
+	$strparams=$matches[2];
+	
+	parse_str($strparams,$params);	
+}

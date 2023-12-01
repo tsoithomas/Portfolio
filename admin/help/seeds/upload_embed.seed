@@ -1,0 +1,302 @@
+<?php
+set_time_limit(0);
+
+function embed#primaryfield##record#uploader(){
+	
+	$#primarykey#=GETVAL('#primarykey#');
+
+	//adjust this according to expected file size. the size should be under upload_max_filesize in php.ini
+	$chunksize=1024*512; 
+	
+	$dmaxsize=20;
+	$maxsize=1024*1024*$dmaxsize; //20 MB
+	
+	global $db;
+	global $codepage;
+
+	$user=userinfo();
+	$userid=$user['userid'];
+	$query="select darkmode from ".TABLENAME_USERS." where userid=?";
+	$rs=sql_prep($query,$db,$userid);
+	$myrow=sql_fetch_assoc($rs);
+	$dark=$myrow['darkmode'];
+
+	$path='../../#primaryfield##records#/';
+		
+	$msg='';
+	
+	$query="select * from #mastertable# where #primarykey#=?";
+	$rs=sql_prep($query,$db,$#primarykey#);
+	$myrow=sql_fetch_array($rs);
+	$#primarydispfield#=$myrow['#primarydispfield#'];
+	
+	if (isset($_GET['abortid'])){
+		$partfn=$path.intval($_GET['abortid']).'#fileext#.part';
+		if (file_exists($partfn)){
+			$query="delete from #lookuptable# where #lookupkey#=? and #primarykey#=?";
+			sql_prep($query,$db,array(intval($_GET['abortid']),$#primarykey#));
+			unlink($partfn);
+			logaction("Cancelled $#primarydispfield# upload #".intval($_GET['abortid']),array('#primarykey#'=>$#primarykey#,'#lookupkey#'=>intval($_GET['abortid'])));
+			return;	
+		}	
+	}
+	
+	if (isset($_FILES['file'])&&isset($_FILES['file']['name'])&&$_FILES['file']['name']!=''){
+		checkgskey('embed#primaryfield##record#uploader_'.$#primarykey#);
+		//echo '<pre>';print_r($_FILES);echo '</pre>'; return;
+			
+		$file=$_FILES['file'];
+		$realfns=$file['tmp_name'];
+		$filesizes=$file['size'];
+		$filetypes=$file['type'];
+		
+		$ofn=noapos(str_replace(' ','_',$file['name']));
+		
+			$chunkend=$filesizes; //backward compatible
+			$firstchunk=1;
+			
+			if (isset($_POST['X-CHUNK-END'])){
+				if (intval($_POST['X-CHUNK-START'])>0) $firstchunk=0;
+				$chunkend=intval($_POST['X-CHUNK-END']);
+				$filesizes=intval($_POST['X-FILE-SIZE']);
+				$file['name']=$_POST['X-FILE-NAME'];
+				$ofn=noapos(str_replace(' ','_',$file['name']));
+			}		
+			
+			//echo '<pre>';print_r($_POST); print_r($_FILES); echo '</pre>'; return;
+		
+			$realfn=$realfns;//[$idx];
+			$filesize=$filesizes;//[$idx];
+			$filetype=$filetypes;//[$idx];
+			$error=$file['error'];
+			
+			
+#iterator-fieldlist-postvars#
+
+			$#lookupkey#=$_POST['X-CHUNK-ID']??null;
+
+			if ($firstchunk&&$error==0){
+				$query="insert into #lookuptable#(#primarykey#,ofn,#iterator-fieldlist-sqlflist#) values (?,?,#iterator-fieldlist-sqlqlist#)";
+				$rs=sql_prep($query,$db,array($#primarykey#,$ofn,#iterator-fieldlist-sqlplist#));
+				$#lookupkey#=sql_insert_id($db,$rs);
+				logaction("started uploading $ofn to $#primarydispfield#",array('#primarykey#'=>$#primarykey#,'file'=>$ofn,'#primarydispfield#'=>$#primarydispfield#,'#lookupkey#'=>$#lookupkey#));			
+			}
+		
+			if (!isset($#lookupkey#)) apperror('Invalid upload ID');
+			
+			$dst=$path.$#lookupkey#.'#fileext#';
+		
+			
+			$partdst=$dst.'.part';
+						
+			if ($chunkend<$filesize){
+				if ($firstchunk) {
+					$f=fopen($partdst,'wb');				
+				} else {
+					$f=fopen($partdst,'ab');
+				}
+				
+				fwrite($f,file_get_contents($realfn));
+				fclose($f);
+				clearstatcache();
+				header('GS-CHUNK-ID:'.$#lookupkey#);				
+				header('GS-SEND-MORE:'.filesize($partdst));
+				return;
+			} else {
+				if (file_exists($partdst)){
+					$f=fopen($partdst,'ab');
+					fwrite($f,file_get_contents($realfn));
+					fclose($f);
+					rename($partdst,$dst);
+					
+					$finfo = finfo_open(FILEINFO_MIME_TYPE);
+					$mimetype=noapos(finfo_file($finfo, $dst));
+					
+					if (isset($#lookupkey#)){
+						$query="update #lookuptable# set mimetype=? where #lookupkey#=? and #primarykey#=?";
+						sql_prep($query,$db,array($mimetype,$#lookupkey#,$#primarykey#));	
+					}
+					
+					logaction("finished uploading $ofn to $#primarydispfield#",array('#primarykey#'=>$#primarykey#,'file'=>$ofn,'#primarydispfield#'=>$#primarydispfield#,'#lookupkey#'=>$#lookupkey#));			
+																
+				}
+			}					
+		
+		if (!isset($_GET['diag'])||!$_GET['diag']){
+?>
+<script>parent.list#primaryfield##records#(<?php echo $#primarykey#;?>,"<?php echo $msg;?>");</script>
+<?php			
+		}
+		
+	}
+	
+	if (isset($_GET['diag'])&&$_GET['diag']) {echo $msg;return;}
+	
+?>
+<html>
+<body style="padding:0;margin:0;">
+<style>
+<?php include 'uploaderstyle.php';?>
+</style>
+<form id="uploader" style="padding:0;margin:0;" method="POST" enctype="multipart/form-data">
+<div id="dropzone" style="display:none;margin:20px 0;padding:10px;border:dashed 2px #dedede;text-align:center;font-size:20px;color:#dedede;">
+	<span id="dropzonetext">Drag and drop file here</span>
+	<span id="dropzoneprogress"></span>
+</div>
+<input type="hidden" name="#primarykey#" value="<?php echo $#primarykey#;?>">
+<input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $maxsize;?>">
+<input type="hidden" name="X-GSREQ-KEY" value="<?php emitgskey('embed#primaryfield##record#uploader_'.$#primarykey#);?>">
+
+<input type="file" name="file" id="file" onchange="upload(this);return false;"> (max <?php echo $dmaxsize;?>MB)
+#iterator-fieldlist-formfields#
+</form>
+<div id="cancel">
+	<span id="progress_">
+		<span id="progress"></span>
+	</span>
+	<a id="cancelbutton" onclick="cancelupload();return false;">x</a>
+</div>
+<div id="debug"></div>
+<script src="nano.js"></script>
+<script>
+function cancelupload(){
+	var btn=gid('file');
+	if (!btn.rq) return;
+	btn.rq.abort();	
+}
+
+function upload(d,dfiles,chunkstart,chunkid){
+	var file=gid('file');
+	var form=gid('uploader');
+	var rq=xmlHTTPRequestObject();
+
+	var html5=(self.FormData&&rq.upload&&file.files)?1:0;
+	if (!html5){
+		d.parentNode.submit();
+		return;
+	}
+
+	var fd=new FormData();
+	fd.append('X-GSREQ-KEY','<?php emitgskey('embed#primaryfield##record#uploader_'.$#primarykey#);?>');
+
+	var binfile=file.files[0];
+	if (dfiles) binfile=dfiles[0];
+	
+	var fsize=0;
+	if (binfile&&binfile.size) fsize=binfile.size;
+	if (fsize><?php echo $maxsize;?>){
+		alert('File too large. Upload a smaller file');
+		return;	
+	}
+	
+	var chunksize=<?php echo $chunksize;?>;
+	if (chunksize>=Math.ceil(binfile.size/4)) chunksize=Math.ceil(binfile.size/4);
+	if (chunksize<512) chunksize=512;
+	
+	if (chunkstart==null) chunkstart=0;	
+	var chunkend=chunkstart+chunksize;
+	if (chunkend>binfile.size) chunkend=binfile.size;
+		
+	var chunk=binfile.slice(chunkstart,chunkend);
+
+	fd.append('file',chunk);
+	fd.append('X-CHUNK-START',chunkstart);
+	fd.append('X-CHUNK-END',chunkend);
+	fd.append('X-FILE-SIZE',binfile.size);
+	fd.append('X-FILE-NAME',binfile.name);
+	
+	if (chunkid!=null) fd.append('X-CHUNK-ID',chunkid);
+	
+	fd.append('#primarykey#',<?php echo $#primarykey#;?>);
+#iterator-fieldlist-fdappend#
+	rq.open('POST','<?php echo $codepage;?>?cmd=embed#primaryfield##record#uploader&#primarykey#=<?php echo $#primarykey#;?>&diag=1',true);
+
+	if (chunkstart==0){
+		gid('debug').innerHTML='upload started...';
+	}
+	
+	var pct=Math.round(chunkstart*100/binfile.size);
+	gid('progress').style.width=pct+'%';
+	gid('cancel').style.display='block';
+	gid('dropzonetext').style.display='none';
+	gid('dropzoneprogress').innerHTML=pct+'%';
+	
+
+	rq.onload=function(e){
+		var sendmore=rq.getResponseHeader('GS-SEND-MORE');
+		if (sendmore!=null) sendmore=parseInt(sendmore,10); else sendmore=0;
+		
+		var chunkid=rq.getResponseHeader('GS-CHUNK-ID');
+		
+		if (sendmore>chunkstart){
+			upload(d,dfiles,sendmore,chunkid);
+			return;				
+		}
+				
+		gid('dropzonetext').style.display='inline';
+		gid('progress').style.width='100%';
+		gid('dropzoneprogress').innerHTML='';		
+		gid('debug').innerHTML='uploaded';
+		gid('cancel').style.display='none';
+		
+		if (e.target.responseText!=null&&e.target.responseText!='') {
+			alert(e.target.responseText);
+			return;
+		}
+		parent.list#primaryfield##records#(<?php echo $#primarykey#;?>,'');
+		gid('uploader').reset();
+	}
+
+	rq.onabort=function(e){
+		gid('cancel').style.display='none';
+		gid('debug').innerHTML='cancelling...';
+		gid('dropzonetext').style.display='inline';
+		gid('dropzoneprogress').innerHTML='';
+		
+		if (chunkid!=null){
+			ajxpgn('debug','<?php echo $codepage;?>?cmd=embedproductmanualuploader&#primarykey#=<?php echo $#primarykey#;?>&diag=1&abortid='+chunkid,0,0,null,function(){
+				gid('debug').innerHTML='canceled';
+				gid('uploader').reset();	
+			});
+		}
+			
+	}
+	
+	d.rq=rq;
+	
+	rq.send(fd);	
+}
+
+if (self.FormData&&'draggable' in document.createElement('span')){
+		gid('dropzone').style.display='block';
+		gid('dropzone').ondragover=function(){this.style.borderColor='#848cf7';this.style.color='#848cf7';return false;}
+		gid('dropzone').ondragleave=function(){this.style.borderColor='#dedede';this.style.color='#dedede';return false;}
+		gid('dropzone').ondragend=function(){this.style.borderColor='#dedede';this.style.color='#dedede';return false;}
+		gid('dropzone').ondrop=function(e){
+			var files=e.dataTransfer.files;
+			if (!files||files.length==0){
+				gid('dropzonetext').innerHTML='invalid file';
+				gid('dropzoneprogress').innerHTML='';
+				return false;
+			}			
+			if (files.length>1){
+				gid('dropzonetext').innerHTML='multiple upload not supported';
+				gid('dropzoneprogress').innerHTML='';
+				return false;	
+			}
+			var fns=[];
+			for (var i=0;i<files.length;i++) fns.push(files[i].name);
+			gid('dropzonetext').innerHTML=files[0].name;
+			gid('dropzoneprogress').innerHTML='';
+			upload(gid('file'),files);
+			return false;	
+		}
+}
+
+</script>
+
+</body>
+</html>
+<?php
+		
+}

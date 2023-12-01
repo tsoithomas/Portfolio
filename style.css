@@ -1,0 +1,322 @@
+.clear{clear:both;}
+
+body{padding:0;margin:0;line-height:1.5em;font-family:'Open Sans',Arial,sans-serif;}
+#main_{background:#F8F9FA;margin-left:25%;margin-right:22%;}
+  #main{padding-left:80px;padding-right:80px;padding-top:50px;}
+ 
+#side_left, #side_right{position:fixed;height:100%;top:0;} 
+#side_left{width:25%;left:0;background:url(images/toronto.jpg) no-repeat 50% 100%;background-size:cover;}
+#side_right{width:22%;right:0;background:#E7EFF2;}
+
+#badge{position:absolute;left:30px;bottom:60px;color:#ffffff;}
+  #site-title{font-size:32px;font-weight:bold;}
+  #location{font-size:16px;background:#B33243;display:inline-block;padding:8px 16px;font-weight:bold;margin-bottom:20px;}
+  #roles {padding-right:30px;}
+    #roles span{white-space:nowrap;}
+    
+    
+#profilelinks{padding-top:50px;margin-left:15px;}
+.profile{display:block;float:left;clear:both;margin-bottom:10px;transition:filter 250ms;}
+  .profile:hover{filter:saturate(150%) hue-rotate(30deg);}
+.profile img{height:40px;}
+
+#bookmarks{position:fixed;right:0;bottom:30%;line-height:1.2em;}
+  .bookmark{cursor:pointer;display:block;float:right;clear:both;margin-bottom:0px;}
+    .bookmark img{width:48px;}
+  .bookmark .label{
+	opacity:0;
+	width:0;overflow:hidden;
+	background:#B33243;color:#ffffff;
+	height:48px;display:inline-block;line-height:48px;
+	padding-left:0;
+  	box-sizing:border-box;border-radius:24px 0 0 24px;
+  	transition:width 120ms, padding 120ms, opacity 300ms;
+  }
+  .bookmark:hover .label{
+	width:80px; padding-left:20px; opacity:1;  
+  }
+  
+  .bookmark.portfolio:hover .label{width:120px;}
+  
+  .bookmark.contact{display:none;}
+  
+.sectiontitle{text-transform:uppercase;color:#B33243;font-size:32px;font-family:Roboto,Arial,sans-serif;padding-top:20px;margin-bottom:30px;}
+
+.subtitle{text-transform:uppercase;font-size:24px;color:#666666;font-family:Roboto,Arial,sans-serif;margin-bottom:30px;}
+
+@keyframes bubble {
+  0% {
+   clip-path: polygon(83.200% 25.800%, 85.100% 28.100%, 86.900% 30.400%, 88.600% 32.700%, 90.200% 35.000%, 91.800% 37.300%, 93.200% 39.600%, 94.500% 41.900%, 95.800% 44.100%, 96.900% 46.400%, 97.800% 48.700%, 98.600% 51.000%, 99.300% 53.300%, 99.800% 55.700%, 100.000% 58.100%, 100.100% 60.500%, 100.000% 63.000%, 99.700% 65.400%, 99.200% 67.800%, 98.500% 70.200%, 97.600% 72.600%, 96.500% 75.000%, 95.200% 77.400%, 93.700% 79.700%, 92.100% 81.900%, 90.300% 84.000%, 88.300% 86.100%, 86.200% 88.100%, 84.000% 89.900%, 81.600% 91.600%, 79.100% 93.200%, 76.500% 94.600%, 73.800% 95.800%, 71.000% 96.900%, 68.000% 97.900%, 65.000% 98.600%, 61.900% 99.200%, 58.800% 99.600%, 55.700% 99.800%, 52.600% 99.900%, 49.500% 99.800%, 46.400% 99.600%, 43.400% 99.200%, 40.400% 98.600%, 37.500% 97.900%, 34.700% 97.000%, 32.000% 96.000%, 29.400% 94.800%, 27.000% 93.500%, 24.700% 92.000%, 22.300% 90.500%, 20.400% 88.800%, 18.600% 87.000%, 16.900% 85.100%, 15.400% 83.000%, 14.000% 80.800%, 12.600% 78.600%, 11.400% 76.300%, 10.200% 74.000%, 8.900% 71.300%, 8.000% 68.800%, 7.100% 66.300%, 6.200% 63.800%, 5.400% 61.200%, 4.600% 58.600%, 3.800% 55.900%, 3.100% 53.200%, 2.400% 50.500%, 1.700% 47.800%, 1.100% 45.200%, 0.700% 42.500%, 0.400% 39.900%, 0.200% 37.300%, 0.000% 34.700%, 0.100% 32.200%, 0.300% 29.700%, 0.700% 27.300%, 1.300% 24.900%, 2.100% 22.600%, 3.100% 20.300%, 4.300% 18.100%, 5.800% 16.000%, 7.500% 14.000%, 9.400% 12.100%, 11.500% 10.300%, 13.800% 8.600%, 16.200% 7.000%, 18.800% 5.600%, 21.500% 4.300%, 24.300% 3.100%, 27.200% 2.200%, 30.100% 1.400%, 33.100% 0.800%, 36.000% 0.400%, 38.900% 0.200%, 41.800% 0.200%, 44.600% 0.400%, 47.400% 0.800%, 50.200% 1.500%, 52.900% 2.400%, 55.500% 3.400%, 58.100% 4.600%, 60.600% 6.000%, 63.100% 7.600%, 65.500% 9.200%, 67.800% 11.000%, 70.100% 12.900%, 72.300% 14.900%, 74.500% 17.000%, 76.600% 19.200%, 78.600% 21.400%, 80.700% 23.600%, 83.200% 25.800%);
+  }
+  50% {
+    clip-path: polygon(98.400% 19.800%, 99.300% 22.300%, 99.800% 24.900%, 100.000% 27.600%, 99.900% 30.400%, 99.600% 33.200%, 99.000% 36.100%, 98.200% 39.000%, 97.300% 42.000%, 96.200% 45.000%, 95.000% 48.000%, 93.700% 51.000%, 92.400% 54.000%, 91.100% 57.000%, 89.800% 60.000%, 88.500% 63.000%, 87.200% 65.900%, 86.000% 68.800%, 84.900% 71.600%, 83.900% 74.300%, 82.900% 77.000%, 81.900% 79.600%, 80.900% 82.100%, 80.000% 84.400%, 79.000% 86.600%, 78.000% 88.700%, 77.000% 90.600%, 75.900% 92.400%, 74.800% 94.000%, 73.600% 95.400%, 72.300% 96.600%, 70.900% 97.600%, 69.400% 98.400%, 67.800% 99.000%, 66.100% 99.400%, 64.200% 99.600%, 62.200% 99.600%, 60.100% 99.500%, 58.000% 99.200%, 55.800% 98.800%, 53.500% 98.200%, 51.100% 97.500%, 48.700% 96.700%, 46.200% 95.800%, 43.700% 94.900%, 41.100% 93.900%, 38.500% 92.900%, 35.900% 91.800%, 33.300% 90.700%, 30.700% 89.600%, 28.100% 88.500%, 25.500% 87.400%, 23.000% 86.300%, 20.500% 85.100%, 18.100% 83.900%, 15.800% 82.700%, 13.600% 81.400%, 11.500% 80.100%, 9.500% 78.700%, 7.700% 77.300%, 6.000% 75.800%, 4.500% 74.200%, 3.200% 72.500%, 2.100% 70.800%, 1.400% 69.400%, 0.700% 67.500%, 0.300% 65.500%, 0.100% 63.400%, 0.000% 61.200%, 0.200% 59.000%, 0.600% 56.700%, 1.100% 54.400%, 1.800% 52.000%, 2.700% 49.600%, 3.700% 47.100%, 4.900% 44.600%, 6.200% 42.000%, 7.600% 39.400%, 9.200% 36.800%, 10.900% 34.200%, 12.700% 31.600%, 14.600% 29.000%, 16.600% 26.400%, 18.700% 23.800%, 20.900% 21.300%, 23.100% 18.800%, 25.400% 16.400%, 27.800% 14.100%, 30.300% 11.900%, 32.900% 9.800%, 35.600% 7.900%, 38.400% 6.200%, 41.300% 4.600%, 44.300% 3.200%, 47.400% 2.100%, 50.600% 1.200%, 53.900% 0.600%, 57.200% 0.200%, 60.500% 0.000%, 63.900% 0.100%, 67.300% 0.500%, 70.700% 1.100%, 74.100% 1.900%, 77.400% 2.900%, 80.600% 4.100%, 83.600% 5.500%, 86.500% 7.100%, 89.200% 8.900%, 91.600% 10.800%, 93.800% 12.800%, 95.700% 15.000%, 97.300% 17.300%, 98.400% 19.800%);
+  }
+  100% {
+    clip-path: polygon(96.500% 13.800%, 97.700% 15.900%, 98.600% 18.100%, 99.300% 20.500%, 99.700% 23.000%, 99.900% 25.600%, 99.900% 28.300%, 99.700% 31.100%, 99.500% 34.000%, 99.000% 36.900%, 98.400% 39.900%, 97.700% 42.900%, 96.900% 45.900%, 96.000% 49.000%, 95.100% 52.100%, 94.100% 55.200%, 93.100% 58.200%, 92.100% 61.200%, 91.100% 64.100%, 90.100% 67.000%, 89.100% 69.800%, 88.000% 72.600%, 86.900% 75.300%, 85.700% 77.900%, 84.500% 80.400%, 83.200% 82.800%, 81.800% 85.100%, 80.300% 87.200%, 78.700% 89.200%, 77.000% 91.000%, 75.200% 92.700%, 73.300% 94.200%, 71.200% 95.600%, 69.000% 96.800%, 66.700% 97.800%, 64.300% 98.600%, 61.800% 99.200%, 59.200% 99.700%, 56.500% 100.000%, 53.800% 100.100%, 51.000% 100.100%, 48.200% 99.900%, 45.400% 99.600%, 42.600% 99.100%, 39.800% 98.500%, 37.000% 97.700%, 34.300% 96.800%, 31.700% 95.700%, 29.100% 94.500%, 26.600% 93.100%, 24.200% 91.600%, 21.900% 90.000%, 19.700% 88.300%, 17.600% 86.500%, 15.600% 84.500%, 13.700% 82.400%, 11.900% 80.300%, 10.300% 78.100%, 8.800% 75.800%, 7.400% 73.400%, 6.100% 70.900%, 4.900% 68.400%, 3.800% 65.800%, 2.800% 63.100%, 2.000% 60.400%, 1.300% 57.600%, 0.700% 54.800%, 0.200% 52.000%, -0.100% 49.200%, -0.300% 46.400%, 0.000% 43.300%, 0.100% 40.500%, 0.300% 37.700%, 0.700% 35.000%, 1.200% 32.300%, 1.900% 29.700%, 2.800% 27.200%, 3.800% 24.700%, 5.000% 22.300%, 6.400% 20.000%, 8.000% 17.900%, 9.800% 15.900%, 11.700% 14.000%, 13.800% 12.200%, 16.100% 10.500%, 18.500% 9.000%, 21.000% 7.600%, 23.700% 6.300%, 26.500% 5.100%, 29.400% 4.100%, 32.400% 3.200%, 35.500% 2.400%, 38.700% 1.700%, 41.900% 1.100%, 45.200% 0.600%, 48.500% 0.300%, 51.900% 0.100%, 55.300% 0.000%, 58.700% 0.000%, 62.100% 0.100%, 65.500% 0.300%, 68.800% 0.700%, 72.100% 1.200%, 75.300% 1.800%, 78.400% 2.600%, 81.300% 3.500%, 84.100% 4.500%, 86.700% 5.700%, 89.100% 7.000%, 91.300% 8.500%, 93.300% 10.100%, 95.000% 11.900%, 96.500% 13.800%);
+  }
+}
+
+#clipper, #quotebox{float:left;}
+
+#clipper {
+  width: 28%;
+
+  animation:bubble 3s linear; 
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}
+
+#clipper img{display:block;width:100%;}
+
+#pquote{margin-bottom:20px;}
+
+#quotebox{
+	width:64%; margin-left:8%;
+	margin-top:40px;
+	background:#ffffff;
+	padding:30px 40px;
+	box-sizing:border-box;
+	position:relative;
+	font-family:Roboto,Arial,sans-serif;
+	font-size:16px;
+	font-weight:bold;
+	color:#7A7A7A;
+}
+.quote_open, .quote_close{width:16px;}
+
+#quotebox .quote_open, #quotebox .quote_close{position:absolute;}
+#quotebox .quote_open{top:10px;left:10px;}
+#quotebox .quote_close{bottom:10px;right:10px;}
+
+#leetcard{text-align:center; margin:0; padding:0;}
+#leetcard img{display:block;margin:0 auto;width:80%;min-width: 580px;aspect-ratio:516/413;background:#ffffff;}
+
+
+
+#skills {
+  display: block;
+  width: 80%;
+  min-width: 580px;
+  background-color: #ffffff;
+  margin: 10px auto 20px auto;
+	border: 1px solid #dddddd;
+  border-radius: 5px;
+  padding: 0;
+}
+
+#skills .row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+#skills .row .heading:hover {
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width: 140px;
+  padding-left: 20px;
+  font-size: 20px;
+  color: #222;
+}
+
+#skills .row .heading:hover ~ .banner {
+  width: 100%;
+  transition: all 0.3s ease-out;
+  background-color: #d3e9f2;
+}
+
+#skills .heading {
+  width: 120px;
+  height: 56px;
+  color: #7a7a7a;
+  padding: 10px;
+  font-family: "Roboto";
+  font-size: 16px;
+  font-weight: 700;
+  vertical-align: middle;
+  line-height: 36px;
+  margin-right: 2px;
+  text-transform: uppercase;
+  box-sizing: border-box;
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+}
+
+#skills .banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 56px;
+  background-color: #e7eff2;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1;
+}
+
+#skills .tools {
+  flex-grow: 1;
+  transition: all 0.15s ease-out;
+  z-index: 10;
+}
+
+#skills .tool {
+  top: 0;
+  left: 0;
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  vertical-align: middle;
+  border: 4px solid rgba(255,255,255,0);
+  border-radius: 0px;
+  background-image: url(/images/icons.png);
+  background-size: 432px 384px;
+  background-repeat: no-repeat;
+  background-clip: content-box;
+  transition: all 0.15s ease-out;
+}
+
+#skills .tool:hover {
+  position: relative;
+  background-color: #fff;
+  scale: 2;
+  border: 4px solid #fff;
+  transition: all 0.15s ease-in;
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  border-radius: 5px;
+}
+
+#skills .typescript {background-position: -48px 0px;}
+#skills .python {background-position: -96px 0px;}
+#skills .php {background-position: -144px 0px;}
+#skills .html {background-position: -192px 0px;}
+#skills .css {background-position: -240px 0px;}
+#skills .java {background-position: -288px 0px;}
+#skills .react {background-position: 0px -48px;}
+#skills .next_js {background-position: -48px -48px;}
+#skills .vue_js {background-position: -96px -48px;}
+#skills .tailwind_css {background-position: -144px -48px;}
+#skills .mantine {background-position: -192px -48px;}
+#skills .jquery {background-position: -240px -48px;}
+#skills .bulma {background-position: -288px -48px;}
+#skills .bootstrap {background-position: -336px -48px;}
+#skills .node_js {background-position: 0px -96px;}
+#skills .express_js {background-position: -48px -96px;}
+#skills .flask {background-position: -96px -96px;}
+#skills .mysql {background-position: 0px -144px;}
+#skills .mongodb {background-position: -48px -144px;}
+#skills .redis {background-position: -96px -144px;}
+#skills .azure {background-position: 0px -192px;}
+#skills .aws {background-position: -48px -192px;}
+#skills .gcp {background-position: -96px -192px;}
+#skills .docker {background-position: -144px -192px;}
+#skills .github {background-position: -192px -192px;}
+#skills .heroku {background-position: -240px -192px;}
+#skills .pandas {background-position: 0px -240px;}
+#skills .scikit_learn {background-position: -48px -240px;}
+#skills .jupyter {background-position: -96px -240px;}
+#skills .tableau {background-position: -144px -240px;}
+#skills .power_bi {background-position: -192px -240px;}
+#skills .chart_js {background-position: -240px -240px;}
+#skills .photoshop {background-position: 0px -288px;}
+#skills .illustrator {background-position: -48px -288px;}
+#skills .premiere_pro {background-position: -96px -288px;}
+#skills .indesign {background-position: -144px -288px;}
+#skills .audition {background-position: -192px -288px;}
+#skills .lightroom {background-position: -240px -288px;}
+
+
+#portfolio .project {
+  display: flex;
+  flex-direction: row;
+  min-height: 200px;
+  background-color: #e7eff2;
+  border-radius: 10px;
+  margin: 10px 0;
+  padding: 15px 20px;
+}
+
+
+#portfolio .project .projectimage {
+  width: 50%;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+#portfolio .project .projectimage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: all 0.15s ease-in-out;
+}
+
+#portfolio .project .projectimage img:hover {
+  scale: 1.15;
+  transition: all 0.15s ease-in-out;
+}
+
+#portfolio .project .projectinfo {
+  flex-grow: 1;
+  width: 100%;
+  font-family: Roboto, sans-serif;
+  margin: 10px 0 10px 15px;
+}
+
+#portfolio .project .projectname {
+  color: rgb(110, 193, 228);
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 10px;
+  text-decoration: none;
+}
+
+#portfolio .project .projectname:hover {
+  color: #2557a7;
+}
+
+#portfolio .project .projectperiod {
+  color: rgb(123, 123, 123);
+  font-weight: 500;
+  font-size: 16px;
+}
+
+#portfolio .project .projectintro {
+  color: rgb(123, 123, 123);
+  font-weight: 500; 
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+#portfolio .tag {
+  display: inline-block;
+  background-color: rgb(179,50,67);
+  border: 1px solid rgb(128,0,0);
+  color: #fff;
+  margin: 0 2px;
+  padding: 2px 10px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+
+/* ============================= */
+
+@media screen and (max-width:1050px){
+
+	#main_{margin:0;}
+	#side_left, #side_right{position:relative;width:auto;height:auto;top:auto;}
+	#side_left{height:340px;background-position:50% 48%;}
+	
+	#skills{margin-right:50px;}
+	
+	#badge{bottom:40px;}
+	
+	#bookmarks{top:30px;bottom:auto;}
+	
+	.bookmark.contact{display:block;}
+}
+
+@media screen and (max-width:600px){
+	#side_left{height:380px;}
+	#bookmarks{top:60px;}
+}

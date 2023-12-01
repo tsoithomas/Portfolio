@@ -1,0 +1,32 @@
+<?php
+
+include 'icl/show#record#.inc.php';
+
+function add#record#(){
+	$#masterkey#=GETVAL('#masterkey#');
+#iterator-fieldlist-servervars#		
+	global $db;
+	$user=userinfo();
+	$gsid=$user['gsid'];
+	
+	checkgskey('add#record#_'.$#masterkey#);
+	
+	$query="insert into #tablename# (#foreignkey#,#iterator-fieldlist-sqlflist#) values (?,#iterator-fieldlist-sqlqlist#) ";
+	$rs=sql_prep($query,$db,array($#foreignkey#,#iterator-fieldlist-sqlplist#));
+	$#primarykey#=sql_insert_id($db,$rs);
+	
+	if (!$#primarykey#) {
+		apperror(_tr('error_creating_record'));
+	}
+	
+
+	logaction("added #c_record# #$#primarykey# $#dispfield#",
+		array('#primarykey#'=>$#primarykey#,'#dispfield#'=>"$#dispfield#"),
+		array('rectype'=>'#master_record##records#','recid'=>$#masterkey#));
+	
+	header('newrecid:'.$#primarykey#);
+	header('newkey:#record#_'.$#primarykey#);
+	header('newparams:show#record#&#primarykey#='.$#primarykey#);
+	
+	show#record#($#primarykey#);
+}

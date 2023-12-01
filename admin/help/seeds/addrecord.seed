@@ -1,0 +1,38 @@
+<?php
+
+include 'icl/show#record#.inc.php';
+
+function add#record#(){
+	
+#iterator-fieldlist-servervars#	
+	global $db;
+	$user=userinfo();
+	
+	checkgskey('add#record#');
+	
+#include-addrecord_gs-when-gslock-is-1##include-addrecord_nogs-when-gslock-is-0#
+	$err=ob_get_clean();
+
+	$#primarykey#=sql_insert_id($db,$rs);
+
+	if (!$#primarykey#) {
+		apperror(_tr('error_creating_record').': '.$err);
+	}
+	
+	logaction("added #c_record# #$#primarykey# $#dispfield#",array('#primarykey#'=>$#primarykey#,'#dispfield#'=>"$#dispfield#"),null,0,array(
+		'table'=>'#tablename#',
+		'recid'=>$#primarykey#,
+		'after'=>array(
+			'#dispfield#'=>$#dispfield#
+		),
+		'diffs'=>array(
+			'#dispfield#'=>$#dispfield#
+		)
+	));
+	
+	header('newrecid:'.$#primarykey#);
+	header('newkey:#record#_'.$#primarykey#);
+	header('newparams:show#record#&#primarykey#='.$#primarykey#);
+	
+	show#record#($#primarykey#);
+}

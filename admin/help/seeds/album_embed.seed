@@ -1,0 +1,337 @@
+<?php
+set_time_limit(0);
+include 'libresize.php';
+
+function embed#primaryfield##record#uploader(){
+	
+	$#primarykey#=SGET('#primarykey#');
+
+	//adjust this according to expected file size. the size should be under upload_max_filesize in php.ini
+	$chunksize=1024*512; 
+	
+	$dmaxsize=20; //20 MB
+	$maxsize=1024*1024*$dmaxsize; 
+	
+	global $db;
+	global $codepage;
+
+	$user=userinfo();
+	$userid=$user['userid'];
+	$query="select darkmode from ".TABLENAME_USERS." where userid=?";
+	$rs=sql_prep($query,$db,$userid);
+	$myrow=sql_fetch_assoc($rs);
+	$dark=$myrow['darkmode'];
+
+	$path='#uploaddir#';
+	
+	global $tinypngapi; //comment this out to disable TinyPNG
+		
+	$msg='';
+	
+	$query="select * from #mastertable# where #primarykey#=?";
+	$rs=sql_prep($query,$db,$#primarykey#);
+	$myrow=sql_fetch_array($rs);
+	$#primarydispfield#=$myrow['#primarydispfield#'];
+	
+	
+	if (isset($_FILES['file'])&&$_FILES['file']&&$_FILES['file']['name']){
+		//echo '<pre>';print_r($_FILES);echo '</pre>'; return;
+		checkgskey('embed#primaryfield##record#uploader_'.$#primarykey#);
+			
+		$file=$_FILES['file'];
+		$realfns=$file['tmp_name'];
+		$filesizes=$file['size'];
+		$filetypes=$file['type'];
+		
+		//echo '<pre>';print_r($_POST); print_r($_FILES); echo '</pre>'; return;
+		
+		$chunkend=$filesizes; //backward compatible
+		$firstchunk=1;
+		
+		if (isset($_POST['X-CHUNK-END'])){
+			if (intval($_POST['X-CHUNK-START'])>0) $firstchunk=0;
+			$chunkend=intval($_POST['X-CHUNK-END']);
+			$filesizes=intval($_POST['X-FILE-SIZE']);
+			$file['name']=$_POST['X-FILE-NAME'];	
+		}
+		
+		$ofn=noapos($file['name']);
+		
+			$realfn=$realfns;//[$idx];
+			$filesize=$filesizes;//[$idx];
+			$filetype=$filetypes;//[$idx];
+			$error=$file['error'];
+			
+			$c=null;
+			
+			$partdst=$path.$#lookupkey#.'.part';
+			if ($chunkend<$filesize){
+				if ($firstchunk) {
+					if (file_exists($partdst)) {
+						if (!isset($_POST['X-CHUNK-RESET'])||$_POST['X-CHUNK-RESET']!=1){
+							header('GS-RESUME-START:'.filesize($partdst));
+							die('upload-resume');
+						}
+					}
+					
+					$f=fopen($partdst,'wb');				
+				} else {
+					$f=fopen($partdst,'ab');
+				}
+				
+				fwrite($f,file_get_contents($realfn));
+				fclose($f);
+				clearstatcache();
+								
+				header('GS-SEND-MORE:'.filesize($partdst));
+				return;
+			} else {
+				if (file_exists($partdst)){
+					$f=fopen($partdst,'ab');
+					fwrite($f,file_get_contents($realfn));
+					fclose($f);
+									
+					$c=file_get_contents($partdst); //avoid loading large files in memory if applicable
+					
+					unlink($partdst);
+				}
+			}
+
+			if (!isset($c)) $c=file_get_contents($realfn); //legacy mode, read the entire file
+			
+
+
+			$img=@imagecreatefromstring($c);
+			if (!$img){
+				$msg='Invalid image format. JPG and PNG only.';
+				if ($error==2) $msg='File too large';
+
+			} else {			
+
+				$w=imagesx($img);
+				$h=imagesy($img);
+
+				if ($w>3500||$h>3000) {//increase this if you have more RAM
+					$msg='Image too large. Upload a smaller one.';
+					imagedestroy($img);
+				} else {
+								
+					$query="insert into #lookuptable#(#primarykey#,ofn) values (?,?)";
+					$rs=sql_prep($query,$db,array($#primarykey#,$ofn));
+					$#lookupkey#=sql_insert_id($db,$rs);
+					
+					$org=$path.$#lookupkey#.'.org#fileext#';
+					$sizes=array(#iterator-sizes-albumsizes#
+					);
+	
+									
+					if (isset($tinypngapi)&&$tinypngapi!=''){
+						$crops=tinypng_crop($c,$sizes,$tinypngapi);
+						
+						$f=fopen($org,'wb');
+						fwrite($f,$crops['org']);
+						fclose($f);
+						
+						foreach ($sizes as $skey=>$size) {
+							$f=fopen($path.$#lookupkey#.'.'.$skey.'#fileext#','wb');
+							fwrite($f,$crops[$skey]);
+							fclose($f);
+						}
+						
+					} else {
+						//$img=image_setorientation($img,'landscape');
+						foreach ($sizes as $skey=>$size){
+							$thumb=image_cropfit($img,$size['width'],$size['height']); imagepng($thumb,$path.$#lookupkey#.'.'.$skey.'#fileext#'); imagedestroy($thumb);
+						}
+					}
+					
+					chmod($org,0777);
+					foreach ($sizes as $skey=>$size) {chmod($path.$#lookupkey#.'.'.$skey.'#fileext#',0777);}
+					
+					imagedestroy($img);
+					
+					logaction("uploaded $ofn to $#primarydispfield#",array('#primarykey#'=>$#primarykey#,'file'=>$ofn,'#primarydispfield#'=>$#primarydispfield#));
+			
+				}
+			}
+				
+		
+		if (!isset($_GET['diag'])||!$_GET['diag']){
+?>
+<script>parent.list#primaryfield##records#(<?php echo $#primarykey#;?>,"<?php echo $msg;?>");</script>
+<?php			
+		}
+		
+	}
+	
+	if (isset($_GET['diag'])&&$_GET['diag']) {echo $msg;return;}
+	
+?>
+<html>
+<body style="padding:0;margin:0;">
+<style>
+<?php include 'uploaderstyle.php';?>
+</style>
+<form id="uploader" style="padding:0;margin:0;" method="POST" enctype="multipart/form-data">
+<div id="dropzone" style="display:none;margin:20px 0;padding:10px;border:dashed 2px #dedede;text-align:center;font-size:20px;color:#dedede;">
+	<span id="dropzonetext">Drag and drop file here</span>
+	<span id="dropzoneprogress"></span>
+</div>
+<input type="hidden" name="#primarykey#" value="<?php echo $#primarykey#;?>">
+<input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $maxsize;?>">
+<input type="hidden" name="X-GSREQ-KEY" value="<?php emitgskey('embed#primaryfield##record#uploader_'.$#primarykey#);?>">
+<input type="file" name="file" id="file" onchange="upload(this);"> (max <?php echo $dmaxsize;?>MB)
+</form>
+<div id="cancel" style="display:none;font-size:12px;padding:5px 0;">
+	<span id="progress_">
+		<span id="progress"></span>
+	</span>
+	<a id="cancelbutton" onclick="cancelupload();return false;">x</a>
+</div>
+<div id="debug"></div>
+<script src="nano.js"></script>
+<script>
+function cancelupload(){
+	var btn=gid('file');
+	if (!btn.rq) return;
+	btn.rq.abort();	
+}
+
+function upload(d,dfiles,chunkstart,reset){
+	
+	var file=gid('file');
+	var form=gid('uploader');
+	var rq=xmlHTTPRequestObject();
+
+	var html5=(self.FormData&&rq.upload&&file.files)?1:0;
+	if (!html5){
+		d.parentNode.submit();
+		return;
+	}
+
+	var fd=new FormData();
+
+	var binfile=file.files[0];
+	if (dfiles) binfile=dfiles[0];
+	
+	var fsize=0;
+	if (binfile&&binfile.size) fsize=binfile.size;
+	if (fsize><?php echo $maxsize;?>){
+		alert('File too large. Upload a smaller file');
+		return;	
+	}
+	
+	var chunksize=<?php echo $chunksize;?>;
+	if (chunksize>=Math.ceil(binfile.size/4)) chunksize=Math.ceil(binfile.size/4);
+	if (chunksize<512) chunksize=512;
+	
+	if (chunkstart==null) chunkstart=0;	
+	var chunkend=chunkstart+chunksize;
+	if (chunkend>binfile.size) chunkend=binfile.size;
+		
+	var chunk=binfile.slice(chunkstart,chunkend);
+
+	fd.append('file',chunk);
+	fd.append('X-CHUNK-START',chunkstart);
+	fd.append('X-CHUNK-END',chunkend);
+	fd.append('X-FILE-SIZE',binfile.size);
+	fd.append('X-FILE-NAME',binfile.name);
+	
+	if (reset!=null) fd.append('X-CHUNK-RESET',reset);
+	
+
+	
+	fd.append('#primarykey#',<?php echo $#primarykey#;?>);
+	fd.append('X-GSREQ-KEY','<?php emitgskey('embed#primaryfield##record#uploader_'.$#primarykey#);?>');
+	rq.open('POST','<?php echo $codepage;?>?cmd=embed#primaryfield##record#uploader&#primarykey#=<?php echo $#primarykey#;?>&diag=1',true);
+
+	if (chunkstart==0) {
+		gid('debug').innerHTML='upload started...';		
+	}
+	
+	var pct=Math.round(chunkstart*100/binfile.size);
+	gid('progress').style.width=pct+'%';
+	gid('cancel').style.display='block';
+	gid('dropzonetext').style.display='none';
+	gid('dropzoneprogress').innerHTML=pct+'%';
+	
+	rq.onload=function(e){
+		
+		var sendmore=rq.getResponseHeader('GS-SEND-MORE');
+		if (sendmore!=null) sendmore=parseInt(sendmore,10); else sendmore=0;
+		if (sendmore>chunkstart){
+			upload(d,dfiles,sendmore);
+			return;				
+		}
+		gid('dropzonetext').style.display='inline';
+		gid('progress').style.width='100%';
+		gid('dropzoneprogress').innerHTML='';
+		
+		gid('debug').innerHTML='uploaded';
+		gid('cancel').style.display='none';
+		if (e.target.responseText!=null&&e.target.responseText!='') {
+			if (e.target.responseText=='upload-resume'){
+				var restart=parseInt(rq.getResponseHeader('GS-RESUME-START'),10);
+				var rpct=Math.round(restart*100/binfile.size);
+				
+				if (confirm('A previous upload was interrupted at '+rpct+'%.\nWould you like to resume the upload?\n\nMake sure it is the same file you are uploading.')){
+					
+					upload(d,dfiles,restart);
+				} else {
+					upload(d,dfiles,0,1);
+				}
+
+				return;
+			}
+			alert(e.target.responseText);
+			return;
+		}
+		parent.list#primaryfield##records#(<?php echo $#primarykey#;?>,'');
+		gid('uploader').reset();
+	}
+
+	rq.onabort=function(e){
+		gid('cancel').style.display='none';
+		gid('debug').innerHTML='canceled';
+		gid('dropzonetext').style.display='inline';
+		gid('dropzoneprogress').innerHTML='';	
+	}
+	
+	d.rq=rq;
+	
+	rq.send(fd);	
+}
+
+if (self.FormData&&'draggable' in document.createElement('span')){
+		gid('dropzone').style.display='block';
+		gid('dropzone').ondragover=function(){this.style.borderColor='#848cf7';this.style.color='#848cf7';return false;}
+		gid('dropzone').ondragleave=function(){this.style.borderColor='#dedede';this.style.color='#dedede';return false;}
+		gid('dropzone').ondragend=function(){this.style.borderColor='#dedede';this.style.color='#dedede';return false;}
+		gid('dropzone').ondrop=function(e){
+			var files=e.dataTransfer.files;
+			if (!files||files.length==0){
+				gid('dropzonetext').innerHTML='invalid file';
+				gid('dropzoneprogress').innerHTML='';
+				return false;
+			}			
+			if (files.length>1){
+				gid('dropzonetext').innerHTML='multiple upload not supported';
+				gid('dropzoneprogress').innerHTML='';
+				return false;	
+			}
+			var fns=[];
+			for (var i=0;i<files.length;i++) fns.push(files[i].name);
+			gid('dropzonetext').innerHTML=files[0].name;
+			gid('dropzoneprogress').innerHTML='';
+			upload(gid('file'),files);
+			return false;	
+		}
+}
+
+</script>
+
+</body>
+</html>
+<?php
+		
+}

@@ -1,0 +1,31 @@
+<?php
+include 'libnumfile.php';
+
+function show#primaryfield##mediatype#($#primarykey#=null){
+	if (!isset($#primarykey#)) $#primarykey#=SGET('#primarykey#');
+	
+	global $db;
+	global $codepage;
+	
+	$query="select * from #tablename# where #primarykey#=?";
+	$rs=sql_prep($query,$db,$#primarykey#);
+	$myrow=sql_fetch_array($rs);
+	
+	$#picflag#=$myrow['#picflag#'];
+	$imgv=intval($myrow['imgv']);
+	
+	if ($#picflag#){
+		$base=numfile_make_path($#primarykey#,'#uploaddir#');	
+?>
+<img src="<?php echo $base;?>/<?php echo $#primarykey#;?>#fileext#?v=<?php echo $imgv;?>" style="width:100%;max-width:#thumbwidth#px;">
+<div style="padding:10px 0;">
+	<a onclick="remove#primaryfield##mediatype#pic('<?php echo $#primarykey#;?>','<?php emitgskey('remove#primaryfield##mediatype#pic_'.$#primarykey#);?>')"><img src="imgs/t.gif" class="img-del"> remove picture</a>
+</div>
+<?php	
+	}
+		
+	?>
+	<iframe style="width:90%;border:none;height:240px;" frameborder="no" src="<?php echo $codepage;?>?cmd=embed#primaryfield##mediatype#uploader&#primarykey#=<?php echo $#primarykey#;?>&hb=<?php echo time();?>"></iframe>
+	<?php
+	
+}

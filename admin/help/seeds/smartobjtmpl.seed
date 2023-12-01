@@ -1,0 +1,18 @@
+
+function tmpl_#record#($params){
+	$#primarykey#=$params['#primarykey#'];
+	global $db;
+	
+	
+	$query="select * from #tablename# where #primarykey#=?";
+	$rs=sql_prep($query,$db,$#primarykey#);
+	
+	$myrow=sql_fetch_assoc($rs);
+	
+	
+	
+	
+}
+
+	
+	

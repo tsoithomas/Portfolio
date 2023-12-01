@@ -1,0 +1,44 @@
+<?php
+
+include 'icl/show#record#.inc.php';
+
+function update#record#(){
+	$#primarykey#=GETVAL('#primarykey#');
+#include-gsguard-when-gslock-is-1#
+#iterator-fieldlist-servervars#
+
+	global $db;
+	$user=userinfo();
+	$gsid=$user['gsid'];
+	
+	checkgskey('update#record#_'.$#primarykey#);
+
+	$query="select * from #tablename# where #primarykey#=?"; 
+	$rs=sql_prep($query,$db,array($#primarykey#));
+	$before=sql_fetch_assoc($rs);
+
+	$query="update #tablename# set #iterator-fieldlist-update# where #primarykey#=?";
+	sql_prep($query,$db,array(#iterator-fieldlist-sqlplist#,$#primarykey#));
+
+	$query="select * from #tablename# where #primarykey#=?"; 
+	$rs=sql_prep($query,$db,array($#primarykey#));
+	$after=sql_fetch_assoc($rs);
+	
+	$dbchanges=array('#primarykey#'=>$#primarykey#,'#dispfield#'=>"$#dispfield#");
+	$diffs=diffdbchanges($before,$after);
+	$dbchanges=array_merge($dbchanges,$diffs); //arg3-masks, arg4-omits
+	
+	$dbchanges=array_merge($dbchanges,$diffs);
+	$trace=array(
+		'table'=>'#tablename#',
+		'recid'=>$#primarykey#,
+		'after'=>$after,
+		'diffs'=>$diffs
+	);
+			
+	logaction("updated #c_record# #$#primarykey# $#dispfield#",
+		$dbchanges,
+		array('rectype'=>'#record#','recid'=>$#primarykey#),0,$trace);
+
+	show#record#($#primarykey#);
+}
